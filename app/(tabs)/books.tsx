@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -29,81 +29,72 @@ export default function BooksScreen() {
   ];
 
   // Mock book data
-  const mockBooks = [
-    {
-      id: "1",
-      title: "The Great Gatsby",
-      author: "F. Scott Fitzgerald",
-      price: 12.99,
-      category: "Fiction",
-      rating: 4.5,
-      cover: "https://via.placeholder.com/150x200/4F46E5/FFFFFF?text=Book",
-      description: "A classic American novel set in the Jazz Age"
-    },
-    {
-      id: "2",
-      title: "A Brief History of Time",
-      author: "Stephen Hawking",
-      price: 15.99,
-      category: "Science",
-      rating: 4.8,
-      cover: "https://via.placeholder.com/150x200/059669/FFFFFF?text=Book",
-      description: "An exploration of cosmology and theoretical physics"
-    },
-    {
-      id: "3",
-      title: "Steve Jobs",
-      author: "Walter Isaacson",
-      price: 18.99,
-      category: "Biography",
-      rating: 4.6,
-      cover: "https://via.placeholder.com/150x200/DC2626/FFFFFF?text=Book",
-      description: "The official biography of Apple co-founder Steve Jobs"
-    },
-    {
-      id: "4",
-      title: "Clean Code",
-      author: "Robert C. Martin",
-      price: 24.99,
-      category: "Technology",
-      rating: 4.7,
-      cover: "https://via.placeholder.com/150x200/7C3AED/FFFFFF?text=Book",
-      description: "A handbook of agile software craftsmanship"
-    },
-    {
-      id: "5",
-      title: "Sapiens",
-      author: "Yuval Noah Harari",
-      price: 16.99,
-      category: "History",
-      rating: 4.4,
-      cover: "https://via.placeholder.com/150x200/EA580C/FFFFFF?text=Book",
-      description: "A brief history of humankind"
-    },
-    {
-      id: "6",
-      title: "To Kill a Mockingbird",
-      author: "Harper Lee",
-      price: 13.99,
-      category: "Fiction",
-      rating: 4.9,
-      cover: "https://via.placeholder.com/150x200/0891B2/FFFFFF?text=Book",
-      description: "A timeless story of racial injustice and childhood"
-    }
-  ];
 
-  useEffect(() => {
-    loadBooks();
-  }, []);
-
-  useEffect(() => {
-    filterBooks();
-  }, [books, searchQuery, selectedCategory]);
-
-  const loadBooks = async () => {
+  const loadBooks = useCallback(async () => {
+    const mockBooks = [
+      {
+        id: "1",
+        title: "The Great Gatsby",
+        author: "F. Scott Fitzgerald",
+        price: 12.99,
+        category: "Fiction",
+        rating: 4.5,
+        cover: "https://via.placeholder.com/150x200/4F46E5/FFFFFF?text=Book",
+        description: "A classic American novel set in the Jazz Age"
+      },
+      {
+        id: "2",
+        title: "A Brief History of Time",
+        author: "Stephen Hawking",
+        price: 15.99,
+        category: "Science",
+        rating: 4.8,
+        cover: "https://via.placeholder.com/150x200/059669/FFFFFF?text=Book",
+        description: "An exploration of cosmology and theoretical physics"
+      },
+      {
+        id: "3",
+        title: "Steve Jobs",
+        author: "Walter Isaacson",
+        price: 18.99,
+        category: "Biography",
+        rating: 4.6,
+        cover: "https://via.placeholder.com/150x200/DC2626/FFFFFF?text=Book",
+        description: "The official biography of Apple co-founder Steve Jobs"
+      },
+      {
+        id: "4",
+        title: "Clean Code",
+        author: "Robert C. Martin",
+        price: 24.99,
+        category: "Technology",
+        rating: 4.7,
+        cover: "https://via.placeholder.com/150x200/7C3AED/FFFFFF?text=Book",
+        description: "A handbook of agile software craftsmanship"
+      },
+      {
+        id: "5",
+        title: "Sapiens",
+        author: "Yuval Noah Harari",
+        price: 16.99,
+        category: "History",
+        rating: 4.4,
+        cover: "https://via.placeholder.com/150x200/EA580C/FFFFFF?text=Book",
+        description: "A brief history of humankind"
+      },
+      {
+        id: "6",
+        title: "To Kill a Mockingbird",
+        author: "Harper Lee",
+        price: 13.99,
+        category: "Fiction",
+        rating: 4.9,
+        cover: "https://via.placeholder.com/150x200/0891B2/FFFFFF?text=Book",
+        description: "A timeless story of racial injustice and childhood"
+      }
+    ];
     setIsLoading(true);
     try {
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
       setBooks(mockBooks);
     } catch {
@@ -111,23 +102,15 @@ export default function BooksScreen() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await loadBooks();
-    setRefreshing(false);
-  };
-
-  const filterBooks = () => {
+  const filterBooks = useCallback(() => {
     let filtered = books;
 
-    // Filter by category
     if (selectedCategory !== "All") {
       filtered = filtered.filter((book) => book.category === selectedCategory);
     }
 
-    // Filter by search query
     if (searchQuery.trim()) {
       filtered = filtered.filter(
         (book) =>
@@ -137,6 +120,20 @@ export default function BooksScreen() {
     }
 
     setFilteredBooks(filtered);
+  }, [books, searchQuery, selectedCategory]);
+
+  useEffect(() => {
+    loadBooks();
+  }, [loadBooks]);
+
+  useEffect(() => {
+    filterBooks();
+  }, [filterBooks]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadBooks();
+    setRefreshing(false);
   };
 
   const handleAddToCart = (book: Book) => {
@@ -249,12 +246,23 @@ export default function BooksScreen() {
         </Text>
 
         {/* Search Bar */}
-        <TextInput
-          className="bg-gray-100 rounded-full px-4 py-3 text-base mb-4"
-          placeholder="Search books or authors..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
+
+        <View className="flex-row gap-4">
+          <TextInput
+            className="bg-gray-100 rounded-full px-4 py-3 text-base mb-4 flex-1"
+            placeholder="Search books or authors..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+          <TouchableOpacity
+            className="w-12 h-12 bg-gray-100 items-center justify-center text-center rounded-full"
+            onPress={() =>
+              Alert.alert("Create a Book", "You can create a new book here.")
+            }
+          >
+            <Text>➕</Text>
+          </TouchableOpacity>
+        </View>
 
         {/* Category Filter */}
         <FlatList

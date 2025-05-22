@@ -1,5 +1,6 @@
+import ProfileMenu from "@/components/UserMenu";
 import { Link, router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Alert,
   FlatList,
@@ -19,39 +20,37 @@ export default function HomeScreen() {
     favoriteGenre: "Fiction"
   });
 
-  // Mock featured books
-  const mockFeaturedBooks = [
-    {
-      id: "1",
-      title: "The Midnight Library",
-      author: "Matt Haig",
-      price: 14.99,
-      cover: "https://via.placeholder.com/120x160/6366F1/FFFFFF?text=Book",
-      isNew: true
-    },
-    {
-      id: "2",
-      title: "Atomic Habits",
-      author: "James Clear",
-      price: 16.99,
-      cover: "https://via.placeholder.com/120x160/10B981/FFFFFF?text=Book",
-      isPopular: true
-    },
-    {
-      id: "3",
-      title: "The Silent Patient",
-      author: "Alex Michaelides",
-      price: 13.99,
-      cover: "https://via.placeholder.com/120x160/F59E0B/FFFFFF?text=Book",
-      isRecommended: true
-    }
-  ];
-
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
-
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
+    // Mock featured books
+    const mockFeaturedBooks = [
+      {
+        id: "1",
+        title: "The Midnight Library",
+        author: "Matt Haig",
+        price: 14.99,
+        cover: "https://via.placeholder.com/120x160/6366F1/FFFFFF?text=Book",
+        isNew: true,
+        rating: 4.5 // Add this
+      },
+      {
+        id: "2",
+        title: "Atomic Habits",
+        author: "James Clear",
+        price: 16.99,
+        cover: "https://via.placeholder.com/120x160/10B981/FFFFFF?text=Book",
+        isPopular: true,
+        rating: 4.8 // Add this
+      },
+      {
+        id: "3",
+        title: "The Silent Patient",
+        author: "Alex Michaelides",
+        price: 13.99,
+        cover: "https://via.placeholder.com/120x160/F59E0B/FFFFFF?text=Book",
+        isRecommended: true,
+        rating: 4.2 // Add this
+      }
+    ];
     try {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 500));
@@ -64,7 +63,11 @@ export default function HomeScreen() {
     } catch (error) {
       console.error("Failed to load dashboard data:", error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadDashboardData();
+  }, [loadDashboardData]);
 
   const quickActions = [
     {
@@ -164,27 +167,18 @@ export default function HomeScreen() {
               {userName}! 👋
             </Text>
           </View>
-          <TouchableOpacity
-            className="bg-white rounded-full p-3 shadow-md w-12 h-12"
-            onPress={() =>
-              Alert.alert("Profile", "Profile settings coming soon!")
-            }
-          >
-            <Text className="text-black text-md items-center justify-center text-center">
-              👤
-            </Text>
-          </TouchableOpacity>
+          <ProfileMenu />
         </View>
 
         {/* Stats Cards */}
         <View className="flex-row gap-4">
-          <View className="flex-1 bg-white rounded-xl p-4">
+          <View className="flex-1 bg-white rounded-xl p-4 shadow-lg">
             <Text className="text-black/80 text-sm">Total Books</Text>
             <Text className="text-black text-2xl font-bold">
               {stats.totalBooks.toLocaleString()}
             </Text>
           </View>
-          <View className="flex-1 bg-white rounded-xl p-4">
+          <View className="flex-1 bg-white rounded-xl p-4 shadow-lg">
             <Text className="text-black/80 text-sm">Books Read</Text>
             <Text className="text-black text-2xl font-bold">
               {stats.readBooks}
